@@ -20,7 +20,8 @@ public class DBUtil {
     private static final String PASSWORD ="19981017";
 
     private static volatile DataSource dataSourse =null;
-    // dataSourse   单例模式是否线程安全
+    // 实现DataSource接口即必须重新getConnection方法，即可以获得Connection对象，有了Connection对象即可以对数据库操作。
+    // dataSourse 单例模式是否线程安全
     //加锁   双重判定   volatile(内存可见)
     public static DataSource getDataSourse(){
         if (dataSourse == null) {
