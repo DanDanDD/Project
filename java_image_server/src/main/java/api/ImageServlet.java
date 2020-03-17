@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dao.Image;
 import dao.ImageDao;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -116,29 +117,35 @@ public class ImageServlet extends HttpServlet {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         image.setUploadTime(simpleDateFormat.format(new Date()));
         image.setContentType(fileItem.getContentType());
-        // 自己构造一个路径来保存
-        //                        加入时间戳使文件路径唯一
-        image.setPath("./image/" + System.currentTimeMillis() + "_" + image.getImageName());
         //  MD5 暂时不考虑
-        image.setMd5("11223344");
+        image.setMd5(DigestUtils.md5Hex(fileItem.get()));
+        // 自己构造一个路径来保存
+        //           加入时间戳使文件路径唯一
+        image.setPath("./image/" + image.getMd5());
         // 存到数据库中
         ImageDao imageDao = new ImageDao();
+        // 查看数据库中是否存在相同 MD5 值的图片，不存在 返回 null
+        Image existImage = imageDao.selectByMd5(image.getMd5());
+
         imageDao.insert(image);
 
         //2. 获取图片内容信息，并且写入磁盘文件
-        File file = new File(image.getPath());
-        try {
-            fileItem.write(file);
-        } catch (Exception e) {
-            e.printStackTrace();
-            resp.setContentType("application/json; charset=utf-8");
-            resp.getWriter().write("{\"ok\": false,\"reason\":\"写如磁盘失败\"}");
-            return;
+        if (existImage == null) {
+            File file = new File(image.getPath());
+            try {
+                fileItem.write(file);
+            } catch (Exception e) {
+                e.printStackTrace();
+                resp.setContentType("application/json; charset=utf-8");
+                resp.getWriter().write("{\"ok\": false,\"reason\":\"写如磁盘失败\"}");
+                return;
+            }
         }
 
         //3. 给给客户端返回一个结果数据
-        resp.setContentType("application/json; charset=utf-8");
-        resp.getWriter().write("{\"ok\":ture}");
+//        resp.setContentType("application/json; charset=utf-8");
+//        resp.getWriter().write("{\"ok\":ture}");
+        resp.sendRedirect("index.html");
     }
 
     /**
@@ -168,8 +175,11 @@ public class ImageServlet extends HttpServlet {
         // 3. 删除本地库中的记录
         imageDao.delete(Integer.parseInt(imageId));
         // 4. 删除本地磁盘文件
-        File file = new File(image.getPath());
-        file.delete();
+        Image existImage = imageDao.selectByMd5(image.getMd5());
+        if (existImage == null) {
+            File file = new File(image.getPath());
+            file.delete();
+        }
         resp.setStatus(200);
         resp.getWriter().write("{\"ok\":ture}");
     }
