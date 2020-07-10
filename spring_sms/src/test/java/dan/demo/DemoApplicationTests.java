@@ -20,7 +20,7 @@ class DemoApplicationTests {
     @Test
     void contextLoads() {
             // 连接阿里云
-            DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "LTAI4G1XM7DyqGDWDPdeKcWF", "");
+            DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "LTAI4G2T1u9xPYYSRUyb7jSu", "");
             IAcsClient client = new DefaultAcsClient(profile);
             // 构建请求
             CommonRequest request = new CommonRequest();
@@ -31,13 +31,13 @@ class DemoApplicationTests {
             request.setSysAction("SendSms");
 
             // 自定义参数 (手机号，验证码，签名，模板)
-        request.putQueryParameter("PhoneNumbers", "133592");
+        request.putQueryParameter("PhoneNumbers", "手机号");
         request.putQueryParameter("SignName", "氮蛋的云图库");
         request.putQueryParameter("TemplateCode", "SMS_193235473");
 
         // 构建一个短信验证码
         HashMap<String,Object> map = new HashMap<>();
-        map.put("code",5201314);
+        map.put("code",2233);
         request.putQueryParameter("TemplateParam", JSONObject.toJSONString(map));
 
 

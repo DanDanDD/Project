@@ -25,13 +25,15 @@ public class SendSmsImpl implements SendSms {
         // 连接阿里云
         DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "LTAI4G1XM7DyqGDWDPdeKcWF", "");
         IAcsClient client = new DefaultAcsClient(profile);
+
         // 构建请求
         CommonRequest request = new CommonRequest();
 
         request.setSysMethod(MethodType.POST);
         request.setSysDomain("dysmsapi.aliyuncs.com");
-        request.setSysVersion("2017-05-25");
+        request.setSysVersion("2017-05-25");  // 版本日期
         request.setSysAction("SendSms");
+
 
         // 自定义参数 (手机号，验证码，签名，模板)
         request.putQueryParameter("PhoneNumbers", "phoneNum");
@@ -44,7 +46,7 @@ public class SendSmsImpl implements SendSms {
         try {
             CommonResponse response = client.getCommonResponse(request);
             System.out.println(response.getData());
-            return response.getHttpResponse().isSuccess()   ;
+            return response.getHttpResponse().isSuccess();
         } catch (ServerException e) {
             e.printStackTrace();
         } catch (ClientException e) {

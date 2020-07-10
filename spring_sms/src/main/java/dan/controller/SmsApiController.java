@@ -28,9 +28,9 @@ public class SmsApiController  {
     @Autowired
     private RedisTemplate<String,String> redisTemplate;
 
-    @GetMapping("/send/{phone}")
+    @GetMapping("/send/{phone}")  // 传递手机号码
     public String code(@PathVariable("phone")String phone){
-        // 调用发送方法（模拟真实业务）
+        // 调用发送方法（模拟真实业务 Redis）
         String code = redisTemplate.opsForValue().get(phone);
         if (StringUtils.isEmpty(code)){
             return phone + ":" + code + "已存在,还没有过期";
@@ -44,7 +44,7 @@ public class SmsApiController  {
         boolean isSend = sendSms.send(phone,"SMS_193235473",param);
 
         if (isSend){
-            redisTemplate.opsForValue().set(phone,code,5, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(phone,code,5, TimeUnit.MINUTES);
             return phone + ":" + code + "发送成功";
         }else{
             return "发送失败";
